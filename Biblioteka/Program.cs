@@ -117,6 +117,8 @@ namespace Biblioteka
         void removeResource(dynamic zasoby, Dictionary<string, int> quantities)
         {
             Console.Clear();
+            bool removed = false;
+            string group_id = "";
             int id_to_remove;
             Console.WriteLine("===================USUWANIE ZASOBU===================");
             Console.WriteLine("Podaj id zasobu do usunięcia");
@@ -126,9 +128,15 @@ namespace Biblioteka
             {
                 if (z.id == id_to_remove)
                 {
+                    group_id = z.group_id;
                     zasoby.RemoveAt(i);
+                    removed = true;
                 }
                 i++;
+            }
+            if (removed)
+            {
+                quantityHandlerRemove(quantities, group_id);
             }
         }
         void printResources(dynamic zasoby, Dictionary<string, int> quantities)
@@ -225,6 +233,18 @@ namespace Biblioteka
             {
                 int temp = quantities[group_id] + 1;
                 quantities[group_id] = temp;
+            }
+        }
+        void quantityHandlerRemove(Dictionary<string, int> quantities, string group_id)
+        {
+            try
+            {
+                int temp = quantities[group_id] - 1;
+                quantities[group_id] = temp;
+            }
+            catch (Exception ex)
+            {
+
             }
         }
     }
