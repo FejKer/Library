@@ -11,7 +11,7 @@ namespace Biblioteka
         {
             private static int last_resource_id;
             public int id { get; private set; }         //id konkretnego egzemplarza
-            public int group_id { get; set; }           //id egzemplarza - kod kreskowy
+            public string group_id { get; set; }           //id egzemplarza - kod kreskowy
             public string name { get; set; }            //nazwa egzemplarza
             public int quantity { get; set; }           //ilosc egzemplarzy
             public bool isAvailable { get; set; }       //czy przedmiot mozna wypozyczyc?
@@ -24,39 +24,47 @@ namespace Biblioteka
 
         public class Book : Zasoby
         {
-            private int pages;
-            private string author;
-            public Book(string name, int group_id)
+            private readonly int pages;
+            private readonly string author;
+            public Book(string name, string group_id, int pages, string author)
             {
                 this.name = name;
                 this.group_id = group_id;
+                this.pages = pages;
+                this.author = author;
             }
         }
 
         public class Newspaper : Zasoby
         {
-            private int date;
-            public Newspaper()
+            private readonly string date;
+            public Newspaper(string name, string group_id, string date)
             {
-
+                this.name = name;
+                this.group_id = group_id;
+                this.date = date;
             }
         }
 
         public class Movie : Zasoby
         {
-            private int length;
-            public Movie()
+            private readonly int length;
+            public Movie(string name, string group_id, int length)
             {
-
+                this.name = name;
+                this.group_id = group_id;
+                this.length = length;
             }
         }
 
         public class ScientificWork : Zasoby
         {
-            private string author;
-            public ScientificWork()
+            private readonly string author;
+            public ScientificWork(string name, string group_id, string author)
             {
-
+                this.name = name;
+                this.group_id = group_id;
+                this.author = author;
             }
         }
 
@@ -68,14 +76,24 @@ namespace Biblioteka
             public Customer()
             {
                 id = Interlocked.Increment(ref last_customer_id);                      //id klienta z automatyczną inkrementacją
-                this.wypozyczone = new List<Zasoby>();                                 //wypozyczone zaosby
+                this.wypozyczone = new List<Zasoby>();                                 //wypozyczone zasoby
             }
         }
 
         static void Main(string[] args)
         {
             var program = new Program();
-            /*
+            var zasoby = new List<Zasoby>();                                            //zmienna przechowująca wszystkie zasoby
+            var customers = new List<Customer>();                                       //zmienna przechowująca wszystkich klientów
+            Dictionary<string, int> quantities = new Dictionary<string, int>();
+            
+            program.printMainMenu(zasoby, quantities);
+
+        }
+
+        void printMainMenu(dynamic zasoby, Dictionary<string, int> quantities)
+        {
+            Console.Clear();
             Console.WriteLine("===================Biblioteka===================");
             Console.WriteLine("1.Wypożycz przedmiot.");
             Console.WriteLine("2.Dodaj nowy przedmiot.");
@@ -84,33 +102,19 @@ namespace Biblioteka
             Console.WriteLine("5.Wyświetl zasoby.");
             Console.WriteLine("6.Zapisz stan do pliku.");
             Console.WriteLine("7.Wczytaj stan z pliku.");
-            
-                        int n = Convert.ToInt32(Console.ReadLine()); //czytamy wybor uzytkownika
+            int n = Convert.ToInt32(Console.ReadLine());                                   //czytamy wybor uzytkownika
 
-                        switch (n)
-                        {
-                            case 1:
-                            case 2:
-                            case 3:
-                            case 4:
-                            case 5:
-                            default: Console.WriteLine("Niewłaściwy wybór."); break;
-                        }
-            */
-            var zasoby = new List<Zasoby>();                //zmienna przechowująca wszystkie zasoby
-            var customers = new List<Customer>();           //zmienna przechowująca wszystkich klientów
-            program.addResource(zasoby);
-            program.printResources(zasoby);
-            System.Threading.Thread.Sleep(2000);
-            program.addResource(zasoby);
-            program.printResources(zasoby);
-            System.Threading.Thread.Sleep(2000);
-            program.removeResource(zasoby);
-            program.printResources(zasoby);
-            System.Threading.Thread.Sleep(5000);
+            switch (n)
+            {
+                case 1:
+                case 2: addResource(zasoby, quantities); printMainMenu(zasoby, quantities); break;
+                case 3: removeResource(zasoby, quantities); printMainMenu(zasoby, quantities); break;
+                case 4:
+                case 5: printResources(zasoby, quantities); printMainMenu(zasoby, quantities); break;
+                default: Console.WriteLine("Niewłaściwy wybór."); printMainMenu(zasoby, quantities); break;
+            }
         }
-
-        void removeResource(dynamic zasoby)
+        void removeResource(dynamic zasoby, Dictionary<string, int> quantities)
         {
             Console.Clear();
             int id_to_remove;
@@ -127,17 +131,20 @@ namespace Biblioteka
                 i++;
             }
         }
-        void printResources(dynamic zasoby)
+        void printResources(dynamic zasoby, Dictionary<string, int> quantities)
         {
             Console.Clear();
             foreach (Zasoby z in zasoby)
             {
+                int q;
+                quantities.TryGetValue(z.group_id, out q);
                 Console.WriteLine("===================================");
-                Console.WriteLine("ID: " + z.id + " Kod Kreskowy: " + z.group_id + " Nazwa: " + z.name + " Czy wypożyczone? " + z.isAvailable);
+                Console.WriteLine("ID: " + z.id + "\nKod Kreskowy: " + z.group_id + "\nNazwa: " + z.name + "\nCzy wypożyczone? " + z.isAvailable + "\nIlość egzemplarzy: " + q);
                 Console.WriteLine("===================================");
             }
+            Console.ReadKey();
         }
-        void addResource(dynamic zasoby)
+        void addResource(dynamic zasoby, Dictionary<string, int> quantities)
         {
             Console.Clear();
             Console.WriteLine("===================DODAWANIE ZASOBU===================");
@@ -149,34 +156,76 @@ namespace Biblioteka
             choice = Convert.ToInt32(Console.ReadLine());
             switch (choice)
             {
-                case 1: addBook(zasoby); break;
-                case 2: addNewspaper(zasoby); break;
-                case 3: addMovie(zasoby); break;
-                case 4: addScientificWork(zasoby); break;
-                default: Console.WriteLine("Niewłaściwy wybór."); addResource(zasoby); break;
+                case 1: addBook(zasoby, quantities); break;
+                case 2: addNewspaper(zasoby, quantities); break;
+                case 3: addMovie(zasoby, quantities); break;
+                case 4: addScientificWork(zasoby, quantities); break;
+                default: Console.WriteLine("Niewłaściwy wybór."); addResource(zasoby, quantities); break;
             }
         }
-        void addBook(dynamic zasoby)
+        void addBook(dynamic zasoby, Dictionary<string, int> quantities)
         {
-            int n;
-            string s;
+            int p;
+            string s, a, n;
             Console.WriteLine("Podaj nazwę:");
             s = Console.ReadLine();
             Console.WriteLine("Podaj kod kreskowy:");
-            n = Convert.ToInt32(Console.ReadLine());
-            zasoby.Add(new Book(s, n));
+            n = Console.ReadLine();
+            Console.WriteLine("Podaj ilosc stron:");
+            p = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("Podaj autora:");
+            a = Console.ReadLine();
+            zasoby.Add(new Book(s, n, p, a));
+            quantityHandler(quantities, n);
         }
-        void addNewspaper(dynamic zasoby)
+        void addNewspaper(dynamic zasoby, Dictionary<string, int> quantities)
         {
-
+            string s, d, n;
+            Console.WriteLine("Podaj nazwę:");
+            s = Console.ReadLine();
+            Console.WriteLine("Podaj kod kreskowy:");
+            n = Console.ReadLine();
+            Console.WriteLine("Podaj date wydania w formacie DD.MM.YYYY:");
+            d = Console.ReadLine();
+            zasoby.Add(new Newspaper(s, n, d));
+            quantityHandler(quantities, n);
         }
-        void addMovie(dynamic zasoby)
+        void addMovie(dynamic zasoby, Dictionary<string, int> quantities)
         {
-
+            int l;
+            string s, n;
+            Console.WriteLine("Podaj nazwę:");
+            s = Console.ReadLine();
+            Console.WriteLine("Podaj kod kreskowy:");
+            n = Console.ReadLine();
+            Console.WriteLine("Podaj długość filmu w minutach:");
+            l = Convert.ToInt32(Console.ReadLine());
+            zasoby.Add(new Movie(s, n, l));
+            quantityHandler(quantities, n);
         }
-        void addScientificWork(dynamic zasoby)
+        void addScientificWork(dynamic zasoby, Dictionary<string, int> quantities)
         {
-
+            string s, a, n;
+            Console.WriteLine("Podaj nazwę:");
+            s = Console.ReadLine();
+            Console.WriteLine("Podaj kod kreskowy:");
+            n = Console.ReadLine();
+            Console.WriteLine("Podaj autora:");
+            a = Console.ReadLine();
+            zasoby.Add(new ScientificWork(s, n, a));
+            quantityHandler(quantities, n);
+        }
+        void quantityHandler(Dictionary<string, int> quantities, string group_id)
+        {
+            try
+            {
+                quantities.Add(group_id, 1);
+            }
+            catch (Exception ex)
+            {
+                int temp = quantities[group_id] + 1;
+                quantities[group_id] = temp;
+            }
         }
     }
 }
