@@ -101,14 +101,20 @@ namespace Biblioteka
             var customers = new List<Customer>();           //zmienna przechowująca wszystkich klientów
             program.addResource(zasoby);
             program.printResources(zasoby);
+            System.Threading.Thread.Sleep(2000);
             program.addResource(zasoby);
             program.printResources(zasoby);
+            System.Threading.Thread.Sleep(2000);
+            program.removeResource(zasoby);
+            program.printResources(zasoby);
+            System.Threading.Thread.Sleep(5000);
         }
 
         void removeResource(dynamic zasoby)
         {
+            Console.Clear();
             int id_to_remove;
-            Console.WriteLine("===================DODAWANIE ZASOBU===================");
+            Console.WriteLine("===================USUWANIE ZASOBU===================");
             Console.WriteLine("Podaj id zasobu do usunięcia");
             id_to_remove = Convert.ToInt32(Console.ReadLine());
             int i = 0;
@@ -123,13 +129,17 @@ namespace Biblioteka
         }
         void printResources(dynamic zasoby)
         {
+            Console.Clear();
             foreach (Zasoby z in zasoby)
             {
+                Console.WriteLine("===================================");
                 Console.WriteLine("ID: " + z.id + " Kod Kreskowy: " + z.group_id + " Nazwa: " + z.name + " Czy wypożyczone? " + z.isAvailable);
+                Console.WriteLine("===================================");
             }
         }
         void addResource(dynamic zasoby)
         {
+            Console.Clear();
             Console.WriteLine("===================DODAWANIE ZASOBU===================");
             int choice;
             Console.WriteLine("1.Książka");
