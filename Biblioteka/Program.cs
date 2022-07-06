@@ -14,6 +14,7 @@ namespace Biblioteka
             public string group_id { get; set; }           //id egzemplarza - kod kreskowy
             public string name { get; set; }            //nazwa egzemplarza
             public bool isBorrowed { get; set; }       //czy przedmiot mozna wypozyczyc?
+            public string customer_name { get; set; }  //kto wypożyczył zasób
 
             public Zasoby()
             {
@@ -205,6 +206,7 @@ namespace Biblioteka
                 {
                     z.isBorrowed = true;
                     customer.wypozyczone.Add(z);
+                    z.customer_name = customer.name;
                     Console.WriteLine("Wypożyczono zasób.");
                     Console.WriteLine("Naciśnij dowolny przycisk.");
                     Console.ReadKey();
@@ -238,6 +240,7 @@ namespace Biblioteka
                 if(z.id == n)
                 {
                     z.isBorrowed = false;
+                    z.customer_name = null;
                     customer.wypozyczone.Remove(z);
                 }
             }
@@ -280,7 +283,16 @@ namespace Biblioteka
                 int q;
                 quantities.TryGetValue(z.group_id, out q);
                 Console.WriteLine("===================================");
-                Console.WriteLine("ID: " + z.id + "\nKod Kreskowy: " + z.group_id + "\nNazwa: " + z.name + "\nCzy wypożyczone? " + z.isBorrowed + "\nIlość egzemplarzy: " + q);
+                Console.Write("ID: " + z.id + "\nKod Kreskowy: " + z.group_id + "\nNazwa: " + z.name + "\nCzy wypożyczone? " + z.isBorrowed + "\nIlość egzemplarzy: " + q);
+                if (z.isBorrowed)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Wypożyczający: " + z.customer_name);
+                }
+                else
+                {
+                    Console.WriteLine();
+                }
                 Console.WriteLine("===================================");
             }
             Console.WriteLine();
