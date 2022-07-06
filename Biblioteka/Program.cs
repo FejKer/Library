@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using System.Threading;
 
 namespace Biblioteka
@@ -113,6 +116,8 @@ namespace Biblioteka
                 case 3: removeResource(zasoby, quantities); printMainMenu(zasoby, quantities, customers); break;
                 case 4: rentResource(customers, zasoby); printMainMenu(zasoby, quantities, customers); break;
                 case 5: printResources(zasoby, quantities); printMainMenu(zasoby, quantities, customers); break;
+                case 6: writeFile(zasoby, customers, quantities); printMainMenu(zasoby, quantities, customers); break;
+                case 7: readFile(zasoby, customers); printMainMenu(zasoby, quantities, customers); break;
                 default: Console.WriteLine("Niewłaściwy wybór."); printMainMenu(zasoby, quantities, customers); break;
             }
         }
@@ -158,7 +163,7 @@ namespace Biblioteka
             {
                 if(customer.name == name)
                 {
-                    Console.WriteLine("Zalogowano");
+                    Console.WriteLine("Zalogowano\n");
                     logged = true;
                 }
             }
@@ -228,6 +233,7 @@ namespace Biblioteka
                     customer = c;
                 }
             }
+            Console.WriteLine("==============TWOJE ZASOBY==============");
             foreach (Zasoby z in customer.wypozyczone)
             {
                 Console.WriteLine("ID: " + z.id);
@@ -242,6 +248,9 @@ namespace Biblioteka
                     z.isBorrowed = false;
                     z.customer_name = null;
                     customer.wypozyczone.Remove(z);
+                    Console.WriteLine("Zwrócono zasób.");
+                    Console.WriteLine("Naciśnij dowolny przycisk.");
+                    Console.ReadKey();
                 }
             }
         }
@@ -309,7 +318,7 @@ namespace Biblioteka
             Console.WriteLine("3.Film");
             Console.WriteLine("4.Praca naukowa");
             choice = Convert.ToInt32(Console.ReadLine());
-            switch (choice)
+            switch (choice)                                                                     //wybór typu zasobu przez użytkownika
             {
                 case 1: addBook(zasoby, quantities); break;
                 case 2: addNewspaper(zasoby, quantities); break;
@@ -386,12 +395,52 @@ namespace Biblioteka
         {
             try
             {
-                int temp = quantities[group_id] - 1;
+                int temp = quantities[group_id] - 1;            // szukamy kodu kreskowego i zmniejszamy ilość egzemplarzy
                 quantities[group_id] = temp;
             }
             catch (Exception ex)
             {
 
+            }
+        }
+        void readFile(dynamic zasoby, dynamic customers)
+        {
+            
+        }
+        void writeFile(dynamic zasoby, dynamic customers, Dictionary<string, int> quantities)
+        {
+            string JSONresult = JsonConvert.SerializeObject(zasoby, Formatting.Indented);
+            string path = @"D:\zasoby.json";
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            using (var tw = new StreamWriter(path, true))
+            {
+                tw.WriteLine(JSONresult.ToString());
+                tw.Close();
+            }
+            JSONresult = JsonConvert.SerializeObject(customers, Formatting.Indented);
+            path = @"D:\customers.json";
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            using (var tw = new StreamWriter(path, true))
+            {
+                tw.WriteLine(JSONresult.ToString());
+                tw.Close();
+            }
+            JSONresult = JsonConvert.SerializeObject(quantities, Formatting.Indented);
+            path = @"D:\quantities.json";
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            using (var tw = new StreamWriter(path, true))
+            {
+                tw.WriteLine(JSONresult.ToString());
+                tw.Close();
             }
         }
     }
