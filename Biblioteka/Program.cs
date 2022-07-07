@@ -25,12 +25,12 @@ namespace Biblioteka
         public class Zasoby : IBiblioteka
         {
             private static int last_resource_id;
-            public int id { get; set; }         //id konkretnego egzemplarza
-            public string group_id { get; set; }           //id egzemplarza - kod kreskowy
-            public string name { get; set; }            //nazwa egzemplarza
-            public bool isBorrowed { get; set; }       //czy przedmiot mozna wypozyczyc?
-            public string customer_name { get; set; }  //kto wypożyczył zasób
-            public bool isRemoved { get; set; }         //czy jest usunięty z bazy danych?
+            public int id { get; set; }
+            public string group_id { get; set; }
+            public string name { get; set; }
+            public bool isBorrowed { get; set; }
+            public string customer_name { get; set; }
+            public bool isRemoved { get; set; }
 
             public Zasoby()
             {
@@ -117,8 +117,15 @@ namespace Biblioteka
             Console.WriteLine("6.Zapisz stan do pliku.");
             Console.WriteLine("7.Wczytaj stan z pliku.");
             Console.WriteLine();
-            int n = Convert.ToInt32(Console.ReadLine());                                   //czytamy wybor uzytkownika
-
+            int n = 0;
+            try
+            {
+                n = Convert.ToInt32(Console.ReadLine());                                   //czytamy wybor uzytkownika
+            }
+            catch (Exception ex)
+            {
+                printMainMenu();
+            }
             switch (n)
             {
                 case 1: rentResource(); printMainMenu(); break;
@@ -136,7 +143,15 @@ namespace Biblioteka
             Console.WriteLine("===================WYPOŻYCZENIE/ZWROT ZASOBU===================");
             Console.WriteLine("1. Nowy klient.");
             Console.WriteLine("2. Powracający klient.");
-            int n = Convert.ToInt32(Console.ReadLine());
+            int n = 0;
+            try
+            {
+                n = Convert.ToInt32(Console.ReadLine());                                   //czytamy wybor uzytkownika
+            }
+            catch (Exception ex)
+            {
+                rentResource();
+            }
             switch (n)
             {
                 case 1: AddCustomer(); break;
@@ -181,8 +196,16 @@ namespace Biblioteka
             {
                 Console.WriteLine("1. Wypożyczenie.");
                 Console.WriteLine("2. Zwrot.");
-                int n = Convert.ToInt32(Console.ReadLine());
-                if(n == 1)
+                int n = 0;
+                try
+                {
+                    n = Convert.ToInt32(Console.ReadLine());                                   //czytamy wybor uzytkownika
+                }
+                catch (Exception ex)
+                {
+                    login();
+                }
+                if (n == 1)
                 {
                     updateResource(name);
                 } else if(n == 2)
@@ -200,7 +223,7 @@ namespace Biblioteka
                 Console.WriteLine("Niepoprawny login.");
                 Console.WriteLine("Naciśnij dowolny przycisk.");
                 Console.ReadKey();
-                login();
+                rentResource();
             }
         }
         void updateResource(string name)
@@ -208,8 +231,16 @@ namespace Biblioteka
             bool borrowed = false;
             Customer customer = null;
             Console.WriteLine("Podaj ID zasobu, który chcesz wypożyczyć.");
-            int n = Convert.ToInt32(Console.ReadLine());
-            foreach(Customer c in customers)
+            int n = 0;
+            try
+            {
+                n = Convert.ToInt32(Console.ReadLine());                                   //czytamy wybor uzytkownika
+            }
+            catch (Exception ex)
+            {
+                updateResource(name);
+            }
+            foreach (Customer c in customers)
             {
                 if(c.name == name)
                 {
@@ -273,10 +304,17 @@ namespace Biblioteka
             Console.Clear();
             bool removed = false;
             string group_id = "";
-            int id_to_remove;
+            int id_to_remove = 0;
             Console.WriteLine("===================USUWANIE ZASOBU===================");
             Console.WriteLine("Podaj id zasobu do usunięcia");
-            id_to_remove = Convert.ToInt32(Console.ReadLine());
+            try
+            {
+                id_to_remove = Convert.ToInt32(Console.ReadLine());
+            }
+            catch (Exception ex)
+            {
+                removeResource();
+            }
             int i = 0;
             foreach (Zasoby z in zasoby.ToArray())
             {
@@ -345,12 +383,19 @@ namespace Biblioteka
         {
             Console.Clear();
             Console.WriteLine("===================DODAWANIE ZASOBU===================");
-            int choice;
+            int choice = 0;
             Console.WriteLine("1.Książka");
             Console.WriteLine("2.Czasopismo");
             Console.WriteLine("3.Film");
             Console.WriteLine("4.Praca naukowa");
-            choice = Convert.ToInt32(Console.ReadLine());
+            try
+            {
+                choice = Convert.ToInt32(Console.ReadLine());
+            }
+            catch (Exception ex)
+            {
+                addResource();
+            }
             switch (choice)                                                                     //wybór typu zasobu przez użytkownika
             {
                 case 1: addBook(); break;
