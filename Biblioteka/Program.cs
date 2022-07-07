@@ -208,7 +208,7 @@ namespace Biblioteka
             }
             foreach(Zasoby z in zasoby)
             {
-                if (z.id == n && z.isBorrowed == false)
+                if (z.id == n && z.isBorrowed == false && z.isRemoved == false)
                 {
                     z.isBorrowed = true;
                     customer.wypozyczone.Add(z);
@@ -426,39 +426,39 @@ namespace Biblioteka
 
             }
         }
-        void readFile()
+        void readFile()                                                     //zapis stanu
         {
-            string fileName = @"D:\zasoby.json";
+            string fileName = "zasoby.json";
             string jsonString = File.ReadAllText(fileName);
             zasoby = JsonConvert.DeserializeObject<List<Zasoby>>(jsonString);
             
-            fileName = @"D:\customers.json";
+            fileName = "customers.json";
             jsonString = File.ReadAllText(fileName);
             customers = JsonConvert.DeserializeObject<List<Customer>>(jsonString);
 
 
-            fileName = @"D:\quantities.json";
+            fileName = "quantities.json";
             jsonString = File.ReadAllText(fileName);
             quantities = JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonString);
         }
-        void writeFile()
+        void writeFile()                                                    //odczyt stanu
         {
             string JSONresult = JsonConvert.SerializeObject(zasoby, Formatting.Indented);
-            string path = @"D:\zasoby.json";
+            string path = "zasoby.json";
             if (File.Exists(path))
             {
                 File.Delete(path);
             }
             File.WriteAllText(path, JSONresult);
             JSONresult = JsonConvert.SerializeObject(customers, Formatting.Indented); ;
-            path = @"D:\customers.json";
+            path = "customers.json";
             if (File.Exists(path))
             {
                 File.Delete(path);
             }
             File.WriteAllText(path, JSONresult);
             JSONresult = JsonConvert.SerializeObject(quantities, Formatting.Indented);
-            path = @"D:\quantities.json";
+            path = "quantities.json";
             if (File.Exists(path))
             {
                 File.Delete(path);
