@@ -3,13 +3,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
 using System.Threading;
 
 namespace Biblioteka
 {
     internal class Program
     {
+        List<Zasoby> zasoby = new List<Zasoby>();                                            //zmienna przechowująca wszystkie zasoby
+        List<Customer> customers = new List<Customer>();                                       //zmienna przechowująca wszystkich klientów
+        Dictionary<string, int> quantities = new Dictionary<string, int>();         //zmienna przechowująca ilości poszczególnych egzemplarzy
         public class Zasoby
         {
             private static int last_resource_id;
@@ -18,6 +20,7 @@ namespace Biblioteka
             public string name { get; set; }            //nazwa egzemplarza
             public bool isBorrowed { get; set; }       //czy przedmiot mozna wypozyczyc?
             public string customer_name { get; set; }  //kto wypożyczył zasób
+            public bool isRemoved { get; set; }         //czy jest usunięty z bazy danych?
 
             public Zasoby()
             {
@@ -70,7 +73,6 @@ namespace Biblioteka
                 this.author = author;
             }
         }
-
         public class Customer
         {
             private static int last_customer_id;
@@ -88,14 +90,12 @@ namespace Biblioteka
         static void Main(string[] args)
         {
             var program = new Program();
-            var zasoby = new List<Zasoby>();                                            //zmienna przechowująca wszystkie zasoby
-            var customers = new List<Customer>();                                       //zmienna przechowująca wszystkich klientów
-            Dictionary<string, int> quantities = new Dictionary<string, int>();         //zmienna przechowująca ilości poszczególnych egzemplarzy
             
-            program.printMainMenu(zasoby, quantities, customers);
+            
+            program.printMainMenu();
         }
 
-        void printMainMenu(dynamic zasoby, Dictionary<string, int> quantities, dynamic customers)
+        void printMainMenu()
         {
             Console.Clear();
             Console.WriteLine("===================Biblioteka===================");
@@ -111,17 +111,17 @@ namespace Biblioteka
 
             switch (n)
             {
-                case 1: rentResource(customers, zasoby); printMainMenu(zasoby, quantities, customers); break;
-                case 2: addResource(zasoby, quantities); printMainMenu(zasoby, quantities, customers); break;
-                case 3: removeResource(zasoby, quantities); printMainMenu(zasoby, quantities, customers); break;
-                case 4: rentResource(customers, zasoby); printMainMenu(zasoby, quantities, customers); break;
-                case 5: printResources(zasoby, quantities); printMainMenu(zasoby, quantities, customers); break;
-                case 6: writeFile(zasoby, customers, quantities); printMainMenu(zasoby, quantities, customers); break;
-                case 7: readFile(zasoby, customers); printMainMenu(zasoby, quantities, customers); break;
-                default: Console.WriteLine("Niewłaściwy wybór."); printMainMenu(zasoby, quantities, customers); break;
+                case 1: rentResource(); printMainMenu(); break;
+                case 2: addResource(); printMainMenu(); break;
+                case 3: removeResource(); printMainMenu(); break;
+                case 4: rentResource(); printMainMenu(); break;
+                case 5: printResources(); printMainMenu(); break;
+                case 6: writeFile(); printMainMenu(); break;
+                case 7: readFile(); printMainMenu(); break;
+                default: Console.WriteLine("Niewłaściwy wybór."); printMainMenu(); break;
             }
         }
-        void rentResource(dynamic customers, dynamic zasoby)
+        void rentResource()
         {
             Console.WriteLine("===================WYPOŻYCZENIE/ZWROT ZASOBU===================");
             Console.WriteLine("1. Nowy klient.");
@@ -129,12 +129,12 @@ namespace Biblioteka
             int n = Convert.ToInt32(Console.ReadLine());
             switch (n)
             {
-                case 1: AddCustomer(customers, zasoby); break;
-                case 2: login(customers, zasoby); break;
-                default: Console.WriteLine("Nieprawidłowy wybór."); rentResource(customers, zasoby); break;
+                case 1: AddCustomer(); break;
+                case 2: login(); break;
+                default: Console.WriteLine("Nieprawidłowy wybór."); rentResource(); break;
             }
         }
-        void AddCustomer(dynamic customers, dynamic zasoby)
+        void AddCustomer()
         {
             Console.WriteLine("Wpisz login, którego chcesz używać:");
             string name = Console.ReadLine();
@@ -146,15 +146,15 @@ namespace Biblioteka
                     Console.WriteLine("Login jest już zajęty.");
                     Console.WriteLine("Naciśnij dowolny przycisk.");
                     Console.ReadKey();
-                    AddCustomer(customers, zasoby);
+                    AddCustomer();
                 }
             }
 
             customers.Add(new Customer(name));
             Console.WriteLine("\nRejestracja pomyślna.");
-            updateResource(zasoby, customers, name);
+            updateResource(name);
         }
-        void login(dynamic customers, dynamic zasoby)
+        void login()
         {
             bool logged = false;
             Console.WriteLine("Podaj login.");
@@ -174,15 +174,15 @@ namespace Biblioteka
                 int n = Convert.ToInt32(Console.ReadLine());
                 if(n == 1)
                 {
-                    updateResource(zasoby, customers, name);
+                    updateResource(name);
                 } else if(n == 2)
                 {
-                    returnResource(zasoby, customers, name);
+                    returnResource(name);
                 }
                 else
                 {
                     Console.WriteLine("Niepoprawny wybór.");
-                    login(customers, zasoby);
+                    login();
                 }
             } 
             else
@@ -190,11 +190,12 @@ namespace Biblioteka
                 Console.WriteLine("Niepoprawny login.");
                 Console.WriteLine("Naciśnij dowolny przycisk.");
                 Console.ReadKey();
-                login(customers, zasoby);
+                login();
             }
         }
-        void updateResource(dynamic zasoby, dynamic customers, string name)
+        void updateResource(string name)
         {
+            bool borrowed = false;
             Customer customer = null;
             Console.WriteLine("Podaj ID zasobu, który chcesz wypożyczyć.");
             int n = Convert.ToInt32(Console.ReadLine());
@@ -215,15 +216,17 @@ namespace Biblioteka
                     Console.WriteLine("Wypożyczono zasób.");
                     Console.WriteLine("Naciśnij dowolny przycisk.");
                     Console.ReadKey();
-                }
-                else
-                {
-                    Console.WriteLine("Niepoprawny numer ID lub zasób jest już wypożyczony.");
-                    updateResource(zasoby, customers, name);
+                    borrowed = true;
+                    break;
                 }
             }
+            if (!borrowed)
+            {
+                Console.WriteLine("Niepoprawny numer ID lub zasób jest już wypożyczony.");
+                updateResource(name);
+            }
         }
-        void returnResource(dynamic zasoby, dynamic customers, string name)
+        void returnResource(string name)
         {
             Customer customer = null;
             foreach (Customer c in customers)
@@ -251,10 +254,11 @@ namespace Biblioteka
                     Console.WriteLine("Zwrócono zasób.");
                     Console.WriteLine("Naciśnij dowolny przycisk.");
                     Console.ReadKey();
+                    break;
                 }
             }
         }
-        void removeResource(dynamic zasoby, Dictionary<string, int> quantities)
+        void removeResource()
         {
             Console.Clear();
             bool removed = false;
@@ -268,15 +272,30 @@ namespace Biblioteka
             {
                 if (z.id == id_to_remove)
                 {
+                    if (z.isBorrowed)
+                    {
+                        z.isBorrowed=false;                                     //zabezpieczenie na wypadek usuniecia zasobu, który jest wypożyczony
+                        string name = z.customer_name;
+                        Customer c1 = null;
+                        z.customer_name=null;
+                        foreach(Customer c2 in customers)
+                        {
+                            if(c2.name == name)
+                            {
+                                c1 = c2;
+                            }
+                        }
+                        c1.wypozyczone.Remove(z);
+                    }
                     group_id = z.group_id;
-                    zasoby.RemoveAt(i);
+                    z.isRemoved = true;
                     removed = true;
                 }
                 i++;
             }
             if (removed)
             {
-                quantityHandlerRemove(quantities, group_id);
+                quantityHandlerRemove(group_id);
             }
             else
             {
@@ -284,11 +303,15 @@ namespace Biblioteka
                 Console.ReadKey();
             }
         }
-        void printResources(dynamic zasoby, Dictionary<string, int> quantities)
+        void printResources()
         {
             Console.Clear();
             foreach (Zasoby z in zasoby)
             {
+                if (z.isRemoved)
+                {
+                    continue;
+                }
                 int q;
                 quantities.TryGetValue(z.group_id, out q);
                 Console.WriteLine("===================================");
@@ -308,7 +331,7 @@ namespace Biblioteka
             Console.WriteLine("Naciśnij dowolny klawisz.");
             Console.ReadKey();
         }
-        void addResource(dynamic zasoby, Dictionary<string, int> quantities)
+        void addResource()
         {
             Console.Clear();
             Console.WriteLine("===================DODAWANIE ZASOBU===================");
@@ -320,14 +343,14 @@ namespace Biblioteka
             choice = Convert.ToInt32(Console.ReadLine());
             switch (choice)                                                                     //wybór typu zasobu przez użytkownika
             {
-                case 1: addBook(zasoby, quantities); break;
-                case 2: addNewspaper(zasoby, quantities); break;
-                case 3: addMovie(zasoby, quantities); break;
-                case 4: addScientificWork(zasoby, quantities); break;
-                default: Console.WriteLine("Niewłaściwy wybór."); addResource(zasoby, quantities); break;
+                case 1: addBook(); break;
+                case 2: addNewspaper(); break;
+                case 3: addMovie(); break;
+                case 4: addScientificWork(); break;
+                default: Console.WriteLine("Niewłaściwy wybór."); addResource(); break;
             }
         }
-        void addBook(dynamic zasoby, Dictionary<string, int> quantities)
+        void addBook()
         {
             int p;
             string s, a, n;
@@ -340,9 +363,9 @@ namespace Biblioteka
             Console.WriteLine("Podaj autora:");
             a = Console.ReadLine();
             zasoby.Add(new Book(s, n, p, a));
-            quantityHandler(quantities, n);
+            quantityHandler(n);
         }
-        void addNewspaper(dynamic zasoby, Dictionary<string, int> quantities)
+        void addNewspaper()
         {
             string s, d, n;
             Console.WriteLine("Podaj nazwę:");
@@ -352,9 +375,9 @@ namespace Biblioteka
             Console.WriteLine("Podaj date wydania w formacie DD.MM.YYYY:");
             d = Console.ReadLine();
             zasoby.Add(new Newspaper(s, n, d));
-            quantityHandler(quantities, n);
+            quantityHandler(n);
         }
-        void addMovie(dynamic zasoby, Dictionary<string, int> quantities)
+        void addMovie()
         {
             int l;
             string s, n;
@@ -365,9 +388,9 @@ namespace Biblioteka
             Console.WriteLine("Podaj długość filmu w minutach:");
             l = Convert.ToInt32(Console.ReadLine());
             zasoby.Add(new Movie(s, n, l));
-            quantityHandler(quantities, n);
+            quantityHandler(n);
         }
-        void addScientificWork(dynamic zasoby, Dictionary<string, int> quantities)
+        void addScientificWork()
         {
             string s, a, n;
             Console.WriteLine("Podaj nazwę:");
@@ -377,9 +400,9 @@ namespace Biblioteka
             Console.WriteLine("Podaj autora:");
             a = Console.ReadLine();
             zasoby.Add(new ScientificWork(s, n, a));
-            quantityHandler(quantities, n);
+            quantityHandler(n);
         }
-        void quantityHandler(Dictionary<string, int> quantities, string group_id)
+        void quantityHandler(string group_id)
         {
             try
             {
@@ -391,7 +414,7 @@ namespace Biblioteka
                 quantities[group_id] = temp;
             }
         }
-        void quantityHandlerRemove(Dictionary<string, int> quantities, string group_id)
+        void quantityHandlerRemove(string group_id)
         {
             try
             {
@@ -403,11 +426,22 @@ namespace Biblioteka
 
             }
         }
-        void readFile(dynamic zasoby, dynamic customers)
+        void readFile()
         {
+            string fileName = @"D:\zasoby.json";
+            string jsonString = File.ReadAllText(fileName);
+            zasoby = JsonConvert.DeserializeObject<List<Zasoby>>(jsonString);
             
+            fileName = @"D:\customers.json";
+            jsonString = File.ReadAllText(fileName);
+            customers = JsonConvert.DeserializeObject<List<Customer>>(jsonString);
+
+
+            fileName = @"D:\quantities.json";
+            jsonString = File.ReadAllText(fileName);
+            quantities = JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonString);
         }
-        void writeFile(dynamic zasoby, dynamic customers, Dictionary<string, int> quantities)
+        void writeFile()
         {
             string JSONresult = JsonConvert.SerializeObject(zasoby, Formatting.Indented);
             string path = @"D:\zasoby.json";
@@ -415,33 +449,21 @@ namespace Biblioteka
             {
                 File.Delete(path);
             }
-            using (var tw = new StreamWriter(path, true))
-            {
-                tw.WriteLine(JSONresult.ToString());
-                tw.Close();
-            }
-            JSONresult = JsonConvert.SerializeObject(customers, Formatting.Indented);
+            File.WriteAllText(path, JSONresult);
+            JSONresult = JsonConvert.SerializeObject(customers, Formatting.Indented); ;
             path = @"D:\customers.json";
             if (File.Exists(path))
             {
                 File.Delete(path);
             }
-            using (var tw = new StreamWriter(path, true))
-            {
-                tw.WriteLine(JSONresult.ToString());
-                tw.Close();
-            }
+            File.WriteAllText(path, JSONresult);
             JSONresult = JsonConvert.SerializeObject(quantities, Formatting.Indented);
             path = @"D:\quantities.json";
             if (File.Exists(path))
             {
                 File.Delete(path);
             }
-            using (var tw = new StreamWriter(path, true))
-            {
-                tw.WriteLine(JSONresult.ToString());
-                tw.Close();
-            }
+            File.WriteAllText(path, JSONresult);
         }
     }
 }
