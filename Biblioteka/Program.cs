@@ -7,15 +7,25 @@ using System.Threading;
 
 namespace Biblioteka
 {
-    internal class Program
+    internal class Biblioteka
     {
         List<Zasoby> zasoby = new List<Zasoby>();                                            //zmienna przechowująca wszystkie zasoby
         List<Customer> customers = new List<Customer>();                                       //zmienna przechowująca wszystkich klientów
         Dictionary<string, int> quantities = new Dictionary<string, int>();         //zmienna przechowująca ilości poszczególnych egzemplarzy
-        public class Zasoby
+        public interface IBiblioteka
+        {
+            static int last_resource_id;
+            int id { get; set; }         //id konkretnego egzemplarza
+            string group_id { get; set; }           //id egzemplarza - kod kreskowy
+            string name { get; set; }            //nazwa egzemplarza
+            bool isBorrowed { get; set; }       //czy przedmiot mozna wypozyczyc?
+            string customer_name { get; set; }  //kto wypożyczył zasób
+            bool isRemoved { get; set; }         //czy jest usunięty z bazy danych?
+        }
+        public class Zasoby : IBiblioteka
         {
             private static int last_resource_id;
-            public int id { get; private set; }         //id konkretnego egzemplarza
+            public int id { get; set; }         //id konkretnego egzemplarza
             public string group_id { get; set; }           //id egzemplarza - kod kreskowy
             public string name { get; set; }            //nazwa egzemplarza
             public bool isBorrowed { get; set; }       //czy przedmiot mozna wypozyczyc?
@@ -89,7 +99,7 @@ namespace Biblioteka
 
         static void Main(string[] args)
         {
-            var program = new Program();
+            var program = new Biblioteka();
             
             
             program.printMainMenu();
