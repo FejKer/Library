@@ -1,26 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Biblioteka
+﻿namespace Biblioteka
 {
-    class ComicBook : Resource
+    internal class ComicBook : Resource
     {
-        public string universe;
-        public ComicBook(string barcode, string name, string description, string dateOfIssue, string universe) : base(barcode, name, description, dateOfIssue)
+        public string Universe { get; set; }
+
+        public ComicBook(string barcode, string name, string description, string dateOfIssue, string universe)
+            : base(barcode, name, description, dateOfIssue)
         {
-            this.universe = universe;
+            Universe = universe;
         }
 
         public override string ToString()
         {
-            if (customer == null)
+            if (Customer == null)
             {
-                return "Komiks: " + id + "\nTytuł: " + name + "\nKod kreskowy: " + barcode + "\nAutor: " + description + "\nRok wydania: " + dateOfIssue + "\nUniwersum: " + universe + "\nDostępna do wypożyczenia";
+                return $"Komiks: {Id}\nTytuł: {Name}\nKod kreskowy: {Barcode}\nAutor: {Description}\nRok wydania: {DateOfIssue}\nUniwersum: {Universe}\nDostępna do wypożyczenia";
             }
-            return "Komiks: " + id + "\nTytuł: " + name + "\nKod kreskowy: " + barcode + "\nAutor: " + description + "\nRok wydania: " + dateOfIssue + "\nUniwersum: " + universe + "\nWypożyczający: " + customer.GetName();
+
+            return $"Komiks: {Id}\nTytuł: {Name}\nKod kreskowy: {Barcode}\nAutor: {Description}\nRok wydania: {DateOfIssue}\nUniwersum: {Universe}\nWypożyczający: {Customer.GetName()}";
         }
     }
 }

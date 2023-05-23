@@ -1,60 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading;
 
 namespace Biblioteka
 {
-    abstract class Resource
+    internal abstract class Resource
     {
-        static int nextId;                 //id referencyjne do stosowania auto inkrementacji
-        public int id { get; set; }             //id konkretnego egzemplarza
-        public string barcode { get; set; }        //id utworu/książki np. kod kreskowy
-        public string name { get; set; }           //tytuł
-        public string description { get; set; }    //opis np. autor
-        public string dateOfIssue { get; set; }     //data wydania
-        public bool isAvailable { get; set; }       //czy dostępne do wypożyczenia
-        public bool isDeleted { get; set; }       //czy usunięte z bazy
-        public Customer? customer { get; set; }     //klient, który wypożyczył zasób
+        private static int nextId = 0;
+
+        public int Id { get; set; }
+        public string Barcode { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string DateOfIssue { get; set; }
+        public bool IsAvailable { get; set; }
+        public bool IsDeleted { get; set; }
+        public Customer? Customer { get; set; }
 
         protected Resource(string barcode, string name, string description, string dateOfIssue)
         {
-            this.id = Interlocked.Increment(ref nextId);
-            this.barcode = barcode;
-            this.name = name;
-            this.description = description;
-            this.dateOfIssue = dateOfIssue;
-            this.isAvailable = true;
-            this.isDeleted = false;
+            Id = Interlocked.Increment(ref nextId);
+            Barcode = barcode;
+            Name = name;
+            Description = description;
+            DateOfIssue = dateOfIssue;
+            IsAvailable = true;
+            IsDeleted = false;
         }
 
-        public static void rentResource(Customer customer, Resource resource)
+        public static void RentResource(Customer customer, Resource resource)
         {
-            if (!resource.isAvailable || resource.isDeleted)
+            if (!resource.IsAvailable || resource.IsDeleted)
             {
-                Program.printMenu("Błąd przy wypożyczaniu");
+                MenuHelper.PrintMenu("Błąd przy wypożyczaniu");
+                return;
             }
 
-            resource.isAvailable = false;
-            resource.customer = customer;
-            customer.addResource(resource);
+            resource.IsAvailable = false;
+            resource.Customer = customer;
+            customer.AddResource(resource);
         }
 
-        public static void returnResource(Customer customer, Resource resource)
+        public static void ReturnResource(Customer customer, Resource resource)
         {
-            if(customer != null)
+            if (customer != null)
             {
-                customer.removeResource(resource);
-                resource.customer = null;
-                resource.isAvailable = true;
+                customer.RemoveResource(resource);
+                resource.Customer = null;
+                resource.IsAvailable = true;
             }
         }
 
-        public string getBarcode()
+        public string GetBarcode()
         {
-            return barcode;
+            return Barcode;
         }
 
+        public override string ToString()
+        {
+            if (Customer == null)
+            {
+                return $"Zasób: {Id}\nTytuł: {Name}\nKod kreskowy: {Barcode}\nOpis: {Description}\nRok wydania: {DateOfIssue}\nDostępny do wypożyczenia";
+            }
+
+            return $"Zasób: {Id}\nTytuł: {Name}\nKod kreskowy: {Barcode}\nOpis: {Description}\nRok wydania: {DateOfIssue}\nWypożyczający: {Customer.GetName()}";
+        }
     }
 }

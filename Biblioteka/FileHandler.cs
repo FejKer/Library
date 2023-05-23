@@ -10,7 +10,7 @@ namespace Biblioteka
     internal class FileHandler
     {
 
-        public static void readFile()                                                     //odczyt stanu
+        public static void ReadFile()                                                     //odczyt stanu
         {
             var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto };
             string fileName = "resources.json";
@@ -30,15 +30,15 @@ namespace Biblioteka
             {
                 foreach (var c in Database.GetCustomers())
                 {
-                    if (r.customer != null && r.customer.name == c.name)
+                    if (r.Customer != null && r.Customer.Name == c.Name)
                     {
-                        c.addResource(r);
+                        c.AddResource(r);
                         break;
                     }
                 }
             }
         }
-        public static void writeFile()                                                    //zapis stanu
+        public static void WriteFile()                                                    //zapis stanu
         {
             var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto };
             string JSONresult = JsonConvert.SerializeObject(Database.GetResources(), Formatting.Indented, settings);

@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Biblioteka
 {
-    internal class Database
+    internal static class Database
     {
-        private static List<Resource> resources = new List<Resource>();                                            //zmienna przechowująca wszystkie zasoby
-        private static List<Customer> customers = new List<Customer>();                                       //zmienna przechowująca wszystkich klientów
-        private static Dictionary<string, int> quantities = new Dictionary<string, int>();                     //zmienna przechowująca ilości poszczególnych egzemplarzy w parze <kod kreskowy, ilosc>
+        private static List<Resource> resources = new List<Resource>();
+        private static List<Customer> customers = new List<Customer>();
+        private static Dictionary<string, int> quantities = new Dictionary<string, int>();
 
-        public static void updateQuantities(string barcode, string op)
+        public static void UpdateQuantities(string barcode, string op)
         {
-            if(!quantities.ContainsKey(barcode))
+            if (!quantities.ContainsKey(barcode))
             {
                 quantities.Add(barcode, 1);
                 return;
@@ -23,21 +19,23 @@ namespace Biblioteka
             if (op == "+")
             {
                 quantities[barcode]++;
-            } else if (op == "-" && quantities[barcode] != 0)
+            }
+            else if (op == "-" && quantities[barcode] != 0)
             {
                 quantities[barcode]--;
-            } else
+            }
+            else
             {
-                Console.WriteLine("Nieprawidłowy operator");
+                MenuHelper.PrintMenu("Nieprawidłowy operator");
             }
         }
 
-        public static void addCustomer(Customer customer)
+        public static void AddCustomer(Customer customer)
         {
             customers.Add(customer);
         }
 
-        public static void addResource(Resource resource)
+        public static void AddResource(Resource resource)
         {
             resources.Add(resource);
         }
@@ -47,30 +45,30 @@ namespace Biblioteka
             return resources;
         }
 
+        public static void SetResources(List<Resource> r)
+        {
+            resources = r;
+        }
+
         public static List<Customer> GetCustomers()
         {
             return customers;
         }
+
+        public static void SetCustomers(List<Customer> c)
+        {
+            customers = c;
+        }
+
 
         public static Dictionary<string, int> GetQuantities()
         {
             return quantities;
         }
 
-        public static void SetResources(List<Resource> res)
+        public static void SetQuantities(Dictionary<string, int> q)
         {
-            resources = res;
+            quantities = q;
         }
-
-        public static void SetCustomers(List<Customer> cus)
-        {
-            customers = cus;
-        }
-
-        public static void SetQuantities(Dictionary<string, int> qua)
-        {
-            quantities = qua;
-        }
-
     }
 }

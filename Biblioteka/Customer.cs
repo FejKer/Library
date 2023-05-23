@@ -1,45 +1,42 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Biblioteka
 {
-    class Customer
+    internal class Customer
     {
-        static int nextId;                 //id referencyjne do stosowania auto inkrementacji
-        public int id { get; set; }                         //id klienta
-        public string name { get; set; }
-        [JsonIgnore]
-        public List<Resource> borrowedResources { get; set; }
+        private static int nextId = 0;
+
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public List<Resource> BorrowedResources { get; set; }
 
         public Customer(string name)
         {
-            this.id = Interlocked.Increment(ref nextId);
-            this.name = name;
-            borrowedResources = new List<Resource>();
+            Id = Interlocked.Increment(ref nextId);
+            Name = name;
+            BorrowedResources = new List<Resource>();
         }
 
         public string GetName()
         {
-            return name;
+            return Name;
         }
 
-        public void removeResource(Resource r)
+        public void RemoveResource(Resource r)
         {
-            borrowedResources.Remove(r);
+            BorrowedResources.Remove(r);
         }
 
-        public void addResource(Resource r)
+        public void AddResource(Resource r)
         {
-            borrowedResources.Add(r);
+            BorrowedResources.Add(r);
         }
 
         public override string ToString()
         {
-            return "Klient: " + id + "\nLogin: " + name + "\nWypożyczone zasoby: " + borrowedResources.Count() + "\n";
+            return $"Klient: {Id}\nLogin: {Name}\nWypożyczone zasoby: {BorrowedResources.Count}\n";
         }
     }
 }

@@ -17,11 +17,11 @@ namespace Biblioteka
 
         public override string ToString()
         {
-            if (customer == null)
+            if (Customer == null)
             {
-                return "Czasopismo: " + id + "\nTytuł: " + name + "\nKod kreskowy: " + barcode + "\nAutor: " + description + "\nRok wydania: " + dateOfIssue + "\nWydawnictwo: " + publicationCompany + "\nDostępna do wypożyczenia";
+                return "Czasopismo: " + Id + "\nTytuł: " + Name + "\nKod kreskowy: " + Barcode + "\nAutor: " + Description + "\nRok wydania: " + DateOfIssue + "\nWydawnictwo: " + publicationCompany + "\nDostępna do wypożyczenia";
             }
-            return "Czasopismo: " + id + "\nTytuł: " + name + "\nKod kreskowy: " + barcode + "\nAutor: " + description + "\nRok wydania: " + dateOfIssue + "\nWydawnictwo: " + publicationCompany + "\nWypożyczający: " + customer.GetName();
+            return "Czasopismo: " + Id + "\nTytuł: " + Name + "\nKod kreskowy: " + Barcode + "\nAutor: " + Description + "\nRok wydania: " + DateOfIssue + "\nWydawnictwo: " + publicationCompany + "\nWypożyczający: " + Customer.GetName();
         }
     }
 }
