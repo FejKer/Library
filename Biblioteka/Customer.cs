@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -10,6 +11,7 @@ namespace Biblioteka
 
         public int Id { get; set; }
         public string Name { get; set; }
+        [JsonIgnore]
         public List<Resource> BorrowedResources { get; set; }
 
         public Customer(string name)

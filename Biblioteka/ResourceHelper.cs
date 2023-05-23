@@ -248,30 +248,33 @@ namespace Biblioteka
 
         public static void RentResource()
         {
-            try
-            {
-                Console.Write("Podaj ID klienta: ");
-                int clientId = int.Parse(Console.ReadLine());
-                Console.Write("Podaj ID zasobu: ");
-                int resourceId = int.Parse(Console.ReadLine());
-
-                var customer = Database.GetCustomers().FirstOrDefault(c => c.Id == clientId);
-                var resource = Database.GetResources().FirstOrDefault(r => r.Id == resourceId);
-
-                if (customer != null && resource != null)
-                {
-                    Resource.RentResource(customer, resource);
-                    MenuHelper.PrintMenu($"Klient {customer.Name} wypożyczył {resource.Name}");
-                }
-                else
-                {
-                    MenuHelper.PrintMenu("Błąd przy wypożyczaniu");
-                }
+            Console.Write("Podaj ID klienta: ");
+            int clientId = int.Parse(Console.ReadLine());
+            Console.Write("Podaj ID zasobu: ");
+            int resourceId = int.Parse(Console.ReadLine());
+            Customer customer = null;
+            Resource resource = null;
+            foreach (Customer c in Database.GetCustomers()) {
+                if (c.Id == clientId) customer = c;
             }
-            catch (Exception)
+            foreach (Resource r in Database.GetResources())
+            {
+                if (r.Id == resourceId) resource = r;
+            }
+            if (customer == null || resource == null)
             {
                 MenuHelper.PrintMenu("Błąd przy wypożyczaniu");
+                return;
             }
+            if (!resource.IsAvailable || resource.IsDeleted)
+            {
+                MenuHelper.PrintMenu("Błąd przy wypożyczaniu");
+                return;
+            }
+            resource.IsAvailable = false;
+            resource.Customer = customer;
+            customer.AddResource(resource);
+            MenuHelper.PrintMenu("Klient " + customer.Name + " wypożyczył: " + resource.Name);
         }
 
         public static void ReturnResource()
