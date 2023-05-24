@@ -13,7 +13,7 @@ namespace Biblioteka
             Console.WriteLine("3. Wypisz zasoby");
             Console.WriteLine("4. Wypisz klientów");
             Console.WriteLine("5. Wypożycz zasób");
-            Console.WriteLine("6. Usuń zasoby biblioteki");
+            Console.WriteLine("6. Modyfikuj zasoby biblioteki");
             Console.WriteLine("7. Zwróć wypożyczony zasób");
             Console.WriteLine("8. Zapisz stan bazy do pliku");
             Console.WriteLine("9. Odczytaj stan bazy z pliku");
@@ -47,7 +47,7 @@ namespace Biblioteka
                     ResourceHelper.RentResource();
                     break;
                 case 6:
-                    ResourceHelper.RemoveResource();
+                    ResourceHelper.ModifyResource();
                     break;
                 case 7:
                     ResourceHelper.ReturnResource();

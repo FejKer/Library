@@ -32,9 +32,9 @@ namespace Biblioteka
 
             foreach (var quantity in quantities)
             {
-                output += "Kod kreskowy: " + quantity.Key + "\nIlość egzemplarzy: " + quantity.Value + "\n\n";
+                int q = quantity.Value;
+                output += "Kod kreskowy: " + quantity.Key + "\nIlość egzemplarzy dostępnych: " + q + "\n\n";
             }
-
             MenuHelper.PrintMenu(output);
         }
 
@@ -96,6 +96,21 @@ namespace Biblioteka
                 return;
             }
 
+            Console.WriteLine("Lokalizacja");
+            Console.Write("Piętro: ");
+            if (!int.TryParse(Console.ReadLine(), out int floor) || floor <= 0)
+            {
+                MenuHelper.PrintMenu("Nieprawidłowe piętro");
+                return;
+            }
+            Console.Write("Alejka:");
+            string alley = Console.ReadLine();
+            if (string.IsNullOrEmpty(alley))
+            {
+                MenuHelper.PrintMenu("Nieprawidłowa alejka");
+                return;
+            }
+
             Console.Write("Rok wydania: ");
             string year = Console.ReadLine();
             if (string.IsNullOrEmpty(year))
@@ -111,7 +126,7 @@ namespace Biblioteka
                 return;
             }
 
-            var book = new Book(barcode, name, description, year, pages);
+            var book = new Book(barcode, name, description, new Location(floor, alley), year, pages);
             Database.AddResource(book);
             Database.UpdateQuantities(barcode, "+");
             MenuHelper.PrintMenu("Utworzono zasób ID " + book.Id);
@@ -143,6 +158,21 @@ namespace Biblioteka
                 return;
             }
 
+            Console.WriteLine("Lokalizacja");
+            Console.Write("Piętro: ");
+            if (!int.TryParse(Console.ReadLine(), out int floor) || floor <= 0)
+            {
+                MenuHelper.PrintMenu("Nieprawidłowe piętro");
+                return;
+            }
+            Console.Write("Alejka:");
+            string alley = Console.ReadLine();
+            if (string.IsNullOrEmpty(alley))
+            {
+                MenuHelper.PrintMenu("Nieprawidłowa alejka");
+                return;
+            }
+
             Console.Write("Rok wydania: ");
             string year = Console.ReadLine();
             if (string.IsNullOrEmpty(year))
@@ -159,7 +189,7 @@ namespace Biblioteka
                 return;
             }
 
-            var comicBook = new ComicBook(barcode, name, description, year, universe);
+            var comicBook = new ComicBook(barcode, name, description, new Location(floor, alley), year, universe);
             Database.AddResource(comicBook);
             Database.UpdateQuantities(barcode, "+");
             MenuHelper.PrintMenu("Utworzono zasób ID " + comicBook.Id);
@@ -191,6 +221,21 @@ namespace Biblioteka
                 return;
             }
 
+            Console.WriteLine("Lokalizacja");
+            Console.Write("Piętro: ");
+            if (!int.TryParse(Console.ReadLine(), out int floor) || floor <= 0)
+            {
+                MenuHelper.PrintMenu("Nieprawidłowe piętro");
+                return;
+            }
+            Console.Write("Alejka:");
+            string alley = Console.ReadLine();
+            if (string.IsNullOrEmpty(alley))
+            {
+                MenuHelper.PrintMenu("Nieprawidłowa alejka");
+                return;
+            }
+
             Console.Write("Rok wydania: ");
             string year = Console.ReadLine();
             if (string.IsNullOrEmpty(year))
@@ -207,43 +252,81 @@ namespace Biblioteka
                 return;
             }
 
-            var newspaper = new Newspaper(barcode, name, description, year, publicationCompany);
+            var newspaper = new Newspaper(barcode, name, description, new Location(floor, alley), year, publicationCompany);
             Database.AddResource(newspaper);
             Database.UpdateQuantities(barcode, "+");
             MenuHelper.PrintMenu("Utworzono zasób ID " + newspaper.Id);
         }
 
-        public static void RemoveResource()
+        public static void ModifyResource()
         {
-            Console.Write("Podaj ID: ");
-
+            Console.WriteLine("1. Usuń zasób.\n2. Oznacz jako uszkodzony.");
             try
             {
-                int id = int.Parse(Console.ReadLine());
-                var resources = Database.GetResources();
+                int choice = int.Parse(Console.ReadLine());
 
-                foreach (var resource in resources)
+                if (choice == 1)
                 {
-                    if (resource.Id == id)
-                    {
-                        if (!resource.IsAvailable)
-                        {
-                            MenuHelper.PrintMenu("Zasób jest aktualnie przez kogoś wypożyczony lub został już usunięty");
-                        }
-
-                        resource.IsDeleted = true;
-                        resource.IsAvailable = false;
-
-                        Database.UpdateQuantities(resource.Barcode, "-");
-                    }
+                    RemoveResource();
+                } else if(choice == 2)
+                {
+                    MarkResourceAsDamaged();
                 }
+
             }
             catch (Exception)
             {
-                MenuHelper.PrintMenu("Błąd przy usuwaniu zasobu");
+                MenuHelper.PrintMenu("Błąd przy modyfikacji zasobu");
+            }
+        }
+
+        private static void RemoveResource()
+        {
+            Console.Write("Podaj ID: ");
+            int id = int.Parse(Console.ReadLine());
+            var resources = Database.GetResources();
+
+            foreach (var resource in resources)
+            {
+                if (resource.Id == id)
+                {
+                    if (!resource.IsAvailable)
+                    {
+                        MenuHelper.PrintMenu("Zasób jest aktualnie przez kogoś wypożyczony lub został już usunięty");
+                    }
+
+                    resource.IsDeleted = true;
+                    resource.IsAvailable = false;
+
+                    Database.UpdateQuantities(resource.Barcode, "-");
+                }
+            }
+            MenuHelper.PrintMenu("Usunięto zasób");
+        }
+
+        private static void MarkResourceAsDamaged()
+        {
+            Console.Write("Podaj ID: ");
+            int id = int.Parse(Console.ReadLine());
+            var resources = Database.GetResources();
+
+            foreach (var resource in resources)
+            {
+                if (resource.Id == id)
+                {
+                    if (!resource.IsAvailable)
+                    {
+                        MenuHelper.PrintMenu("Zasób jest aktualnie przez kogoś wypożyczony lub został już oznaczony jako uszkodzony");
+                    }
+
+                    resource.IsDamaged = true;
+                    resource.IsAvailable = false;
+
+                    Database.UpdateQuantities(resource.Barcode, "-");
+                }
             }
 
-            MenuHelper.PrintMenu("Usunięto zasób");
+            MenuHelper.PrintMenu("Oznaczono zasób jako uszkodzony");
         }
 
         public static void RentResource()

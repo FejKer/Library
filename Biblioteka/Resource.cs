@@ -12,24 +12,28 @@ namespace Biblioteka
         public string Name { get; set; }
         public string Description { get; set; }
         public string DateOfIssue { get; set; }
+        public Location Location { get; set; }
         public bool IsAvailable { get; set; }
         public bool IsDeleted { get; set; }
+        public bool IsDamaged { get; set; }
         public Customer? Customer { get; set; }
 
-        protected Resource(string barcode, string name, string description, string dateOfIssue)
+        protected Resource(string barcode, string name, string description, string dateOfIssue, Location location)
         {
             Id = Interlocked.Increment(ref nextId);
             Barcode = barcode;
             Name = name;
             Description = description;
             DateOfIssue = dateOfIssue;
+            Location = location;
             IsAvailable = true;
             IsDeleted = false;
+            IsDamaged = false;
         }
 
         public static void RentResource(Customer customer, Resource resource)
         {
-            if (!resource.IsAvailable || resource.IsDeleted)
+            if (!resource.IsAvailable || resource.IsDeleted || resource.IsDamaged)
             {
                 MenuHelper.PrintMenu("Błąd przy wypożyczaniu");
                 return;
@@ -57,9 +61,13 @@ namespace Biblioteka
 
         public override string ToString()
         {
+            if (IsDamaged)
+            {
+                return $"Zasób: {Id}\nTytuł: {Name}\nKod kreskowy: {Barcode}\nOpis: {Description}\nLokalizacja w bibliotece: {Location}\nRok wydania: {DateOfIssue}\nUszkodzony - niedostępny do wypożyczenia";
+            }
             if (Customer == null)
             {
-                return $"Zasób: {Id}\nTytuł: {Name}\nKod kreskowy: {Barcode}\nOpis: {Description}\nRok wydania: {DateOfIssue}\nDostępny do wypożyczenia";
+                return $"Zasób: {Id}\nTytuł: {Name}\nKod kreskowy: {Barcode}\nOpis: {Description}\nLokalizacja w bibliotece: {Location}\nRok wydania: {DateOfIssue}\nDostępny do wypożyczenia";
             }
 
             return $"Zasób: {Id}\nTytuł: {Name}\nKod kreskowy: {Barcode}\nOpis: {Description}\nRok wydania: {DateOfIssue}\nWypożyczający: {Customer.GetName()}";
