@@ -17,7 +17,3 @@ This is a Library Management System application that allows users to manage reso
 - Newtonsoft.Json (JSON serialization)
 
 ## Getting Started
-
-### Prerequisites
-
-- [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
